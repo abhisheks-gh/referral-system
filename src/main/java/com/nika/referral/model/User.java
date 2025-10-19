@@ -1,5 +1,7 @@
 package com.nika.referral.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,14 +31,16 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String referralCode;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "referrer_id")
+    @JsonBackReference
     private User referrer; // self-referencing for referral chain
 
     @OneToMany(mappedBy = "referrer", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<User> directReferrals;
 
     @Column(nullable = false)
