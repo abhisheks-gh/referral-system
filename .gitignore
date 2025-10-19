@@ -1,3 +1,16 @@
+# Local environment / secret configs
+.env
+application-local.yml
+application-local.properties
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
 HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar
