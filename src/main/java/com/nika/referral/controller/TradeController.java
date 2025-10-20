@@ -27,19 +27,35 @@ public class TradeController {
      * Simulates a trade event (used to test commission distribution logic).
      */
     @PostMapping("/trade")
-    public ResponseEntity<Map<String, Object>> simulateTrade(@RequestBody Map<String, Object> payload) {
+    public ResponseEntity<?> simulateTrade(@RequestBody Map<String, Object> payload) {
         // System.out.println("DEBUG raw payload: " + payload);
-        Long userId = Long.valueOf(payload.get("userId").toString());
-        BigDecimal tradeVolume = new BigDecimal(payload.get("tradeVolume").toString());
-        BigDecimal feePercent = new BigDecimal(payload.get("feePercent").toString());
+        try {
+            // Extract with null checks
+            Object userIdObj = payload.get("userId");
+            Object tradeVolumeObj = payload.get("tradeVolume");
+            Object feePercentObj = payload.get("feePercent");
 
-        commissionService.processTrade(userId, tradeVolume, feePercent);
+            if (userIdObj == null || tradeVolumeObj == null || feePercentObj == null) {
+                throw new IllegalArgumentException(
+                        "Missing one or more required fields: userId, tradeVolume, feePercent"
+                );
+            }
+            Long userId = Long.valueOf(userIdObj.toString());
+            BigDecimal tradeVolume = new BigDecimal(tradeVolumeObj.toString());
+            BigDecimal feePercent = new BigDecimal(feePercentObj.toString());
 
-        return ResponseEntity.ok(Map.of(
-                "message", "Trade processed successfully",
-                "userId", userId,
-                "tradeVolume", tradeVolume,
-                "feePercent", feePercent
-        ));
+            commissionService.processTrade(userId, tradeVolume, feePercent);
+
+            return ResponseEntity.ok(Map.of(
+                    "message", "Trade processed successfully",
+                    "userId", userId,
+                    "tradeVolume", tradeVolume,
+                    "feePercent", feePercent
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
+        }
     }
 }
